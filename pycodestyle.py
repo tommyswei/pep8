@@ -1341,7 +1341,7 @@ def parse_udiff(diff, patterns=None, parent='.'):
     # For each file of the diff, the entry key is the filename,
     # and the value is a set of row numbers to consider.
     rv = {}
-    path = nrows = None
+    parsed_path = nrows = None
     for line in diff.splitlines():
         if nrows:
             if line[:1] != '-':
@@ -1350,12 +1350,12 @@ def parse_udiff(diff, patterns=None, parent='.'):
         if line[:3] == '@@ ':
             hunk_match = HUNK_REGEX.match(line)
             (row, nrows) = [int(g or '1') for g in hunk_match.groups()]
-            rv[path].update(range(row, row + nrows))
+            rv[parsed_path].update(range(row, row + nrows))
         elif line[:3] == '+++':
-            path = line[4:].split('\t', 1)[0]
-            if path[:2] == 'b/':
-                path = path[2:]
-            rv[path] = set()
+            parsed_path = line[4:].split('\t', 1)[0]
+            if parsed_path[:2] == 'b/':
+                parsed_path = parsed_path[2:]
+            rv[parsed_path] = set()
     return dict([(os.path.join(parent, path), rows)
                  for (path, rows) in rv.items()
                  if rows and filename_match(path, patterns)])
